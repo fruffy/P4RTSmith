@@ -7,7 +7,7 @@ namespace P4::P4Tools::RtSmith {
 void FuzzerConfig::setMaxEntryGenCnt(const int numEntries) {
     if (numEntries < 0) {
         error(
-            "P4RuntimeSmith: The maximum number of entries to generate must be a non-negative "
+            "ControlPlaneSmith: The maximum number of entries to generate must be a non-negative "
             "integer.");
     }
     maxEntryGenCnt = numEntries;
@@ -15,14 +15,14 @@ void FuzzerConfig::setMaxEntryGenCnt(const int numEntries) {
 
 void FuzzerConfig::setMaxAttempts(const int numAttempts) {
     if (numAttempts <= 0) {
-        error("P4RuntimeSmith: The number of attempts must be a positive integer.");
+        error("ControlPlaneSmith: The number of attempts must be a positive integer.");
     }
     maxAttempts = numAttempts;
 }
 
 void FuzzerConfig::setMaxTables(const int numTables) {
     if (numTables < 0) {
-        error("P4RuntimeSmith: The maximum number of tables must be a non-negative integer.");
+        error("ControlPlaneSmith: The maximum number of tables must be a non-negative integer.");
     }
     maxTables = numTables;
 }
@@ -39,13 +39,13 @@ void FuzzerConfig::setMaxUpdateCount(const size_t count) { maxUpdateCount = coun
 
 void FuzzerConfig::setMaxUpdateTimeInMicroseconds(const uint64_t micros) {
     if (micros <= 0) {
-        error("P4RuntimeSmith: The maximum wait time must be a positive integer.");
+        error("ControlPlaneSmith: The maximum wait time must be a positive integer.");
     }
     maxUpdateTimeInMicroseconds = micros;
 }
 void FuzzerConfig::setMinUpdateTimeInMicroseconds(const uint64_t micros) {
     if (micros <= 0) {
-        error("P4RuntimeSmith: The minimum wait time must be a positive integer.");
+        error("ControlPlaneSmith: The minimum wait time must be a positive integer.");
     }
     minUpdateTimeInMicroseconds = micros;
 }
@@ -57,7 +57,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
         // converted to) type `std::string_view`.
         tomlConfig = toml::parse_file(path.string());
     } catch (const toml::parse_error &e) {
-        error("P4RuntimeSmith: Failed to parse fuzzer configuration file: %1%", e.what());
+        error("ControlPlaneSmith: Failed to parse fuzzer configuration file: %1%", e.what());
     }
 
     // For the following blocks, retrieve the configurations from the TOML file and override the
@@ -70,7 +70,8 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
             int maxEntryGenCntConfig = maxEntryGenCntNodeOpt.value().value<int>().value();
             setMaxEntryGenCnt(maxEntryGenCntConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of entries to generate must be an integer.");
+            error(
+                "ControlPlaneSmith: The maximum number of entries to generate must be an integer.");
         }
     }
 
@@ -79,7 +80,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
             int maxAttemptsConfig = maxAttemptsNodeOpt.value().value<int>().value();
             setMaxAttempts(maxAttemptsConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of attempts must be an integer.");
+            error("ControlPlaneSmith: The maximum number of attempts must be an integer.");
         }
     }
 
@@ -88,7 +89,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
             int maxTablesConfig = maxTablesNodeOpt.value().value<int>().value();
             setMaxTables(maxTablesConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of tables must be an integer.");
+            error("ControlPlaneSmith: The maximum number of tables must be an integer.");
         }
     }
 
@@ -100,12 +101,12 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
                 if (const auto *str = expectedStringRepresentation.as_string()) {
                     tablesToSkipConfig.push_back(str->get());
                 } else {
-                    error("P4RuntimeSmith: The tables to skip must be strings.");
+                    error("ControlPlaneSmith: The tables to skip must be strings.");
                 }
             }
             setTablesToSkip(tablesToSkipConfig);
         } else {
-            error("P4RuntimeSmith: The tables to skip must be an array.");
+            error("ControlPlaneSmith: The tables to skip must be an array.");
         }
     }
 
@@ -115,7 +116,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
                 thresholdForDeletionNodeOpt.value().value<uint64_t>().value();
             setThresholdForDeletion(thresholdForDeletionConfig);
         } else {
-            error("P4RuntimeSmith: The threshold for deletion must be an integer.");
+            error("ControlPlaneSmith: The threshold for deletion must be an integer.");
         }
     }
 
@@ -124,7 +125,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
             size_t maxUpdateCountConfig = maxUpdateCountNodeOpt.value().value<size_t>().value();
             setMaxUpdateCount(maxUpdateCountConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of updates must be an integer.");
+            error("ControlPlaneSmith: The maximum number of updates must be an integer.");
         }
     }
 
@@ -135,7 +136,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
                 maxUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
             setMaxUpdateTimeInMicroseconds(maxUpdateTimeInMicrosecondsConfig);
         } else {
-            error("P4RuntimeSmith: The maximum wait time must be an integer.");
+            error("ControlPlaneSmith: The maximum wait time must be an integer.");
         }
     }
     if (const auto minUpdateTimeInMicrosecondsNodeOpt =
@@ -145,7 +146,7 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
                 minUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
             setMinUpdateTimeInMicroseconds(minUpdateTimeInMicrosecondsConfig);
         } else {
-            error("P4RuntimeSmith: The minimum wait time must be an integer.");
+            error("ControlPlaneSmith: The minimum wait time must be an integer.");
         }
     }
 }
@@ -157,7 +158,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
         // converted to) type `std::string_view`.
         tomlConfig = toml::parse(configInString);
     } catch (const toml::parse_error &e) {
-        error("P4RuntimeSmith: Failed to parse fuzzer configuration string: %1%", e.what());
+        error("ControlPlaneSmith: Failed to parse fuzzer configuration string: %1%", e.what());
     }
 
     // For the following blocks, retrieve the configurations from the TOML file and override the
@@ -170,7 +171,8 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
             int maxEntryGenCntConfig = maxEntryGenCntNodeOpt.value().value<int>().value();
             setMaxEntryGenCnt(maxEntryGenCntConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of entries to generate must be an integer.");
+            error(
+                "ControlPlaneSmith: The maximum number of entries to generate must be an integer.");
         }
     }
 
@@ -179,7 +181,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
             int maxAttemptsConfig = maxAttemptsNodeOpt.value().value<int>().value();
             setMaxAttempts(maxAttemptsConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of attempts must be an integer.");
+            error("ControlPlaneSmith: The maximum number of attempts must be an integer.");
         }
     }
 
@@ -188,7 +190,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
             int maxTablesConfig = maxTablesNodeOpt.value().value<int>().value();
             setMaxTables(maxTablesConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of tables must be an integer.");
+            error("ControlPlaneSmith: The maximum number of tables must be an integer.");
         }
     }
 
@@ -200,12 +202,12 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
                 if (const auto *str = expectedStringRepresentation.as_string()) {
                     tablesToSkipConfig.push_back(str->get());
                 } else {
-                    error("P4RuntimeSmith: The tables to skip must be strings.");
+                    error("ControlPlaneSmith: The tables to skip must be strings.");
                 }
             }
             setTablesToSkip(tablesToSkipConfig);
         } else {
-            error("P4RuntimeSmith: The tables to skip must be an array.");
+            error("ControlPlaneSmith: The tables to skip must be an array.");
         }
     }
 
@@ -215,7 +217,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
                 thresholdForDeletionNodeOpt.value().value<uint64_t>().value();
             setThresholdForDeletion(thresholdForDeletionConfig);
         } else {
-            error("P4RuntimeSmith: The threshold for deletion must be an integer.");
+            error("ControlPlaneSmith: The threshold for deletion must be an integer.");
         }
     }
 
@@ -224,7 +226,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
             size_t maxUpdateCountConfig = maxUpdateCountNodeOpt.value().value<size_t>().value();
             setMaxUpdateCount(maxUpdateCountConfig);
         } else {
-            error("P4RuntimeSmith: The maximum number of updates must be an integer.");
+            error("ControlPlaneSmith: The maximum number of updates must be an integer.");
         }
     }
 
@@ -235,7 +237,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
                 maxUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
             setMaxUpdateTimeInMicroseconds(maxUpdateTimeInMicrosecondsConfig);
         } else {
-            error("P4RuntimeSmith: The maximum wait time must be an integer.");
+            error("ControlPlaneSmith: The maximum wait time must be an integer.");
         }
     }
     if (const auto minUpdateTimeInMicrosecondsNodeOpt =
@@ -245,7 +247,7 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
                 minUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
             setMinUpdateTimeInMicroseconds(minUpdateTimeInMicrosecondsConfig);
         } else {
-            error("P4RuntimeSmith: The minimum wait time must be an integer.");
+            error("ControlPlaneSmith: The minimum wait time must be an integer.");
         }
     }
 }

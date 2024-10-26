@@ -73,42 +73,6 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     return P4_SOURCE(P4Headers::V1MODEL, templateString.str().c_str());
 }
 
-// template<typename T>
-// T castTOMLNode(const toml::node& node, const std::string& errorMsg) {
-//     if constexpr (std::is_same_v<T, int>) {
-//         if (node.is_integer()) {
-//             return node.as_integer()->get();
-//         } else {
-//             GTEST_FAIL() << errorMsg;
-//         }
-//     }
-//     else if constexpr (std::is_same_v<T, std::string>) {
-//         if (node.is_string()) {
-//             return node.as_string()->get();
-//         } else {
-//             GTEST_FAIL() << errorMsg;
-//         }
-//     }
-//     else if constexpr (std::is_same_v<T, std::vector<std::string>) {
-//         if (node.is_array()) {
-//             std::vector<std::string> result;
-//             for (const auto& element : *node.as_array()) {
-//                 if (element.is_string()) {
-//                     result.push_back(element.as_string()->get());
-//                 } else {
-//                     GTEST_FAIL() << errorMsg;
-//                 }
-//             }
-//             return result;
-//         } else {
-//             GTEST_FAIL() << errorMsg;
-//         }
-//     }
-//     else {
-//         GTEST_FAIL() << "Unsupported type cast attempted";
-//     }
-// }
-
 }  // anonymous namespace
 
 }  // namespace P4::P4Tools::Test
