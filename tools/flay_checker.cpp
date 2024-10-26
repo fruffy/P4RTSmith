@@ -123,6 +123,12 @@ int run(const FlayCheckerOptions &options, const RtSmithOptions &rtSmithOptions)
         if (options.skipParsers()) {
             flayOptions.setSkipParsers();
         }
+        if (rtSmithOptions.userP4Info().has_value()) {
+            flayOptions.setUserP4Info(rtSmithOptions.userP4Info().value());
+        }
+        flayOptions.setControlPlaneApi(std::string(rtSmithOptions.controlPlaneApi()));
+        flayOptions.preprocessor_options = rtSmithOptions.preprocessor_options;
+        flayOptions.setControlPlaneConfig(rtSmithOptions.outputDir() / "initial_config.txtpb");
         flayOptions.setConfigurationUpdatePattern(rtSmithOptions.outputDir() / "*update_*.txtpb");
         ASSIGN_OR_RETURN(auto flayServiceStatistics, Flay::Flay::optimizeProgram(flayOptions),
                          EXIT_FAILURE);

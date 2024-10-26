@@ -20,7 +20,7 @@ namespace P4::P4Tools::RtSmith::Tna {
  *  TofinoTnaRtSmithTarget implementation
  * ============================================================================================= */
 
-TofinoTnaRtSmithTarget::TofinoTnaRtSmithTarget() : RtSmithTarget("tofino", "tna") {}
+TofinoTnaRtSmithTarget::TofinoTnaRtSmithTarget() : RtSmithTarget("tofino1", "tna") {}
 
 void TofinoTnaRtSmithTarget::make() {
     static TofinoTnaRtSmithTarget *INSTANCE = nullptr;

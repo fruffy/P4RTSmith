@@ -79,9 +79,9 @@ std::optional<RtSmithResult> runRtSmith(const CompilerResult &rtSmithResult,
         auto initialConfigPath = dirPath;
         if (rtSmithOptions.configName().has_value()) {
             initialConfigPath = initialConfigPath / rtSmithOptions.configName().value();
-            initialConfigPath = initialConfigPath.replace_extension("_update_0");
+            initialConfigPath = initialConfigPath.replace_extension("initial_config");
         } else {
-            initialConfigPath = initialConfigPath / "update_0";
+            initialConfigPath = initialConfigPath / "initial_config";
         }
         initialConfigPath = initialConfigPath.replace_extension(".txtpb");
 
