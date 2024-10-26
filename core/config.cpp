@@ -66,44 +66,36 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
     if (const auto maxEntryGenCntNodeOpt = getTOMLNode(tomlConfig, "maxEntryGenCnt")) {
         // Check if the node represents an integer, meaning whether the configuration provided is
         // valid.
-        if (maxEntryGenCntNodeOpt.value().type() == toml::node_type::integer) {
-            int maxEntryGenCntConfig = maxEntryGenCntNodeOpt.value().value<int>().value();
-            setMaxEntryGenCnt(maxEntryGenCntConfig);
+        if (auto maxEntryGenCntOpt = castTOMLNode<int>(maxEntryGenCntNodeOpt.value())) {
+            setMaxEntryGenCnt(maxEntryGenCntOpt.value());
         } else {
+            // Generate an error if the configuration is not an integer.
             error(
-                "ControlPlaneSmith: The maximum number of entries to generate must be an integer.");
+                "ControlPlaneSmith: The maximum number of entries to generate must be an "
+                "integer.");
         }
     }
 
     if (const auto maxAttemptsNodeOpt = getTOMLNode(tomlConfig, "maxAttempts")) {
-        if (maxAttemptsNodeOpt.value().type() == toml::node_type::integer) {
-            int maxAttemptsConfig = maxAttemptsNodeOpt.value().value<int>().value();
-            setMaxAttempts(maxAttemptsConfig);
+        if (auto maxAttemptsOpt = castTOMLNode<int>(maxAttemptsNodeOpt.value())) {
+            setMaxAttempts(maxAttemptsOpt.value());
         } else {
             error("ControlPlaneSmith: The maximum number of attempts must be an integer.");
         }
     }
 
     if (const auto maxTablesNodeOpt = getTOMLNode(tomlConfig, "maxTables")) {
-        if (maxTablesNodeOpt.value().type() == toml::node_type::integer) {
-            int maxTablesConfig = maxTablesNodeOpt.value().value<int>().value();
-            setMaxTables(maxTablesConfig);
+        if (auto maxTablesOpt = castTOMLNode<int>(maxTablesNodeOpt.value())) {
+            setMaxTables(maxTablesOpt.value());
         } else {
             error("ControlPlaneSmith: The maximum number of tables must be an integer.");
         }
     }
 
     if (const auto tablesToSkipNodeOpt = getTOMLNode(tomlConfig, "tablesToSkip")) {
-        if (tablesToSkipNodeOpt.value().type() == toml::node_type::array) {
-            std::vector<std::string> tablesToSkipConfig;
-            const auto *expectedStringRepresentations = tablesToSkipNodeOpt.value().as_array();
-            for (const auto &expectedStringRepresentation : *expectedStringRepresentations) {
-                if (const auto *str = expectedStringRepresentation.as_string()) {
-                    tablesToSkipConfig.push_back(str->get());
-                } else {
-                    error("ControlPlaneSmith: The tables to skip must be strings.");
-                }
-            }
+        if (auto tablesToSkipConfigOpt =
+                castTOMLNode<std::vector<std::string>>(tablesToSkipNodeOpt.value())) {
+            const std::vector<std::string> &tablesToSkipConfig = tablesToSkipConfigOpt.value();
             setTablesToSkip(tablesToSkipConfig);
         } else {
             error("ControlPlaneSmith: The tables to skip must be an array.");
@@ -111,19 +103,17 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
     }
 
     if (const auto thresholdForDeletionNodeOpt = getTOMLNode(tomlConfig, "thresholdForDeletion")) {
-        if (thresholdForDeletionNodeOpt.value().type() == toml::node_type::integer) {
-            uint64_t thresholdForDeletionConfig =
-                thresholdForDeletionNodeOpt.value().value<uint64_t>().value();
-            setThresholdForDeletion(thresholdForDeletionConfig);
+        if (auto thresholdForDeletionOpt =
+                castTOMLNode<uint64_t>(thresholdForDeletionNodeOpt.value())) {
+            setThresholdForDeletion(static_cast<uint64_t>(thresholdForDeletionOpt.value()));
         } else {
             error("ControlPlaneSmith: The threshold for deletion must be an integer.");
         }
     }
 
     if (const auto maxUpdateCountNodeOpt = getTOMLNode(tomlConfig, "maxUpdateCount")) {
-        if (maxUpdateCountNodeOpt.value().type() == toml::node_type::integer) {
-            size_t maxUpdateCountConfig = maxUpdateCountNodeOpt.value().value<size_t>().value();
-            setMaxUpdateCount(maxUpdateCountConfig);
+        if (auto maxUpdateCountOpt = castTOMLNode<size_t>(maxUpdateCountNodeOpt.value())) {
+            setMaxUpdateCount(static_cast<size_t>(maxUpdateCountOpt.value()));
         } else {
             error("ControlPlaneSmith: The maximum number of updates must be an integer.");
         }
@@ -131,20 +121,20 @@ void FuzzerConfig::overrideFuzzerConfigs(std::filesystem::path path) {
 
     if (const auto maxUpdateTimeInMicrosecondsNodeOpt =
             getTOMLNode(tomlConfig, "maxUpdateTimeInMicroseconds")) {
-        if (maxUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
-            uint64_t maxUpdateTimeInMicrosecondsConfig =
-                maxUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
-            setMaxUpdateTimeInMicroseconds(maxUpdateTimeInMicrosecondsConfig);
+        if (auto maxUpdateTimeInMicrosecondsOpt =
+                castTOMLNode<uint64_t>(maxUpdateTimeInMicrosecondsNodeOpt.value())) {
+            setMaxUpdateTimeInMicroseconds(
+                static_cast<uint64_t>(maxUpdateTimeInMicrosecondsOpt.value()));
         } else {
             error("ControlPlaneSmith: The maximum wait time must be an integer.");
         }
     }
     if (const auto minUpdateTimeInMicrosecondsNodeOpt =
             getTOMLNode(tomlConfig, "minUpdateTimeInMicroseconds")) {
-        if (minUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
-            uint64_t minUpdateTimeInMicrosecondsConfig =
-                minUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
-            setMinUpdateTimeInMicroseconds(minUpdateTimeInMicrosecondsConfig);
+        if (auto minUpdateTimeInMicrosecondsOpt =
+                castTOMLNode<uint64_t>(minUpdateTimeInMicrosecondsNodeOpt.value())) {
+            setMinUpdateTimeInMicroseconds(
+                static_cast<uint64_t>(minUpdateTimeInMicrosecondsOpt.value()));
         } else {
             error("ControlPlaneSmith: The minimum wait time must be an integer.");
         }
@@ -167,44 +157,36 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
     if (const auto maxEntryGenCntNodeOpt = getTOMLNode(tomlConfig, "maxEntryGenCnt")) {
         // Check if the node represents an integer, meaning whether the configuration provided is
         // valid.
-        if (maxEntryGenCntNodeOpt.value().type() == toml::node_type::integer) {
-            int maxEntryGenCntConfig = maxEntryGenCntNodeOpt.value().value<int>().value();
-            setMaxEntryGenCnt(maxEntryGenCntConfig);
+        if (auto maxEntryGenCntOpt = castTOMLNode<int>(maxEntryGenCntNodeOpt.value())) {
+            setMaxEntryGenCnt(maxEntryGenCntOpt.value());
         } else {
+            // Generate an error if the configuration is not an integer.
             error(
-                "ControlPlaneSmith: The maximum number of entries to generate must be an integer.");
+                "ControlPlaneSmith: The maximum number of entries to generate must be an "
+                "integer.");
         }
     }
 
     if (const auto maxAttemptsNodeOpt = getTOMLNode(tomlConfig, "maxAttempts")) {
-        if (maxAttemptsNodeOpt.value().type() == toml::node_type::integer) {
-            int maxAttemptsConfig = maxAttemptsNodeOpt.value().value<int>().value();
-            setMaxAttempts(maxAttemptsConfig);
+        if (auto maxAttemptsOpt = castTOMLNode<int>(maxAttemptsNodeOpt.value())) {
+            setMaxAttempts(maxAttemptsOpt.value());
         } else {
             error("ControlPlaneSmith: The maximum number of attempts must be an integer.");
         }
     }
 
     if (const auto maxTablesNodeOpt = getTOMLNode(tomlConfig, "maxTables")) {
-        if (maxTablesNodeOpt.value().type() == toml::node_type::integer) {
-            int maxTablesConfig = maxTablesNodeOpt.value().value<int>().value();
-            setMaxTables(maxTablesConfig);
+        if (auto maxTablesOpt = castTOMLNode<int>(maxTablesNodeOpt.value())) {
+            setMaxTables(maxTablesOpt.value());
         } else {
             error("ControlPlaneSmith: The maximum number of tables must be an integer.");
         }
     }
 
     if (const auto tablesToSkipNodeOpt = getTOMLNode(tomlConfig, "tablesToSkip")) {
-        if (tablesToSkipNodeOpt.value().type() == toml::node_type::array) {
-            std::vector<std::string> tablesToSkipConfig;
-            const auto *expectedStringRepresentations = tablesToSkipNodeOpt.value().as_array();
-            for (const auto &expectedStringRepresentation : *expectedStringRepresentations) {
-                if (const auto *str = expectedStringRepresentation.as_string()) {
-                    tablesToSkipConfig.push_back(str->get());
-                } else {
-                    error("ControlPlaneSmith: The tables to skip must be strings.");
-                }
-            }
+        if (auto tablesToSkipConfigOpt =
+                castTOMLNode<std::vector<std::string>>(tablesToSkipNodeOpt.value())) {
+            const std::vector<std::string> &tablesToSkipConfig = tablesToSkipConfigOpt.value();
             setTablesToSkip(tablesToSkipConfig);
         } else {
             error("ControlPlaneSmith: The tables to skip must be an array.");
@@ -212,19 +194,17 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
     }
 
     if (const auto thresholdForDeletionNodeOpt = getTOMLNode(tomlConfig, "thresholdForDeletion")) {
-        if (thresholdForDeletionNodeOpt.value().type() == toml::node_type::integer) {
-            uint64_t thresholdForDeletionConfig =
-                thresholdForDeletionNodeOpt.value().value<uint64_t>().value();
-            setThresholdForDeletion(thresholdForDeletionConfig);
+        if (auto thresholdForDeletionOpt =
+                castTOMLNode<uint64_t>(thresholdForDeletionNodeOpt.value())) {
+            setThresholdForDeletion(static_cast<uint64_t>(thresholdForDeletionOpt.value()));
         } else {
             error("ControlPlaneSmith: The threshold for deletion must be an integer.");
         }
     }
 
     if (const auto maxUpdateCountNodeOpt = getTOMLNode(tomlConfig, "maxUpdateCount")) {
-        if (maxUpdateCountNodeOpt.value().type() == toml::node_type::integer) {
-            size_t maxUpdateCountConfig = maxUpdateCountNodeOpt.value().value<size_t>().value();
-            setMaxUpdateCount(maxUpdateCountConfig);
+        if (auto maxUpdateCountOpt = castTOMLNode<size_t>(maxUpdateCountNodeOpt.value())) {
+            setMaxUpdateCount(static_cast<size_t>(maxUpdateCountOpt.value()));
         } else {
             error("ControlPlaneSmith: The maximum number of updates must be an integer.");
         }
@@ -232,20 +212,20 @@ void FuzzerConfig::overrideFuzzerConfigsInString(std::string configInString) {
 
     if (const auto maxUpdateTimeInMicrosecondsNodeOpt =
             getTOMLNode(tomlConfig, "maxUpdateTimeInMicroseconds")) {
-        if (maxUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
-            uint64_t maxUpdateTimeInMicrosecondsConfig =
-                maxUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
-            setMaxUpdateTimeInMicroseconds(maxUpdateTimeInMicrosecondsConfig);
+        if (auto maxUpdateTimeInMicrosecondsOpt =
+                castTOMLNode<uint64_t>(maxUpdateTimeInMicrosecondsNodeOpt.value())) {
+            setMaxUpdateTimeInMicroseconds(
+                static_cast<uint64_t>(maxUpdateTimeInMicrosecondsOpt.value()));
         } else {
             error("ControlPlaneSmith: The maximum wait time must be an integer.");
         }
     }
     if (const auto minUpdateTimeInMicrosecondsNodeOpt =
             getTOMLNode(tomlConfig, "minUpdateTimeInMicroseconds")) {
-        if (minUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
-            uint64_t minUpdateTimeInMicrosecondsConfig =
-                minUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value();
-            setMinUpdateTimeInMicroseconds(minUpdateTimeInMicrosecondsConfig);
+        if (auto minUpdateTimeInMicrosecondsOpt =
+                castTOMLNode<uint64_t>(minUpdateTimeInMicrosecondsNodeOpt.value())) {
+            setMinUpdateTimeInMicroseconds(
+                static_cast<uint64_t>(minUpdateTimeInMicrosecondsOpt.value()));
         } else {
             error("ControlPlaneSmith: The minimum wait time must be an integer.");
         }

@@ -62,7 +62,7 @@ TEST_F(TOMLFuzzerConfigurationTest, OverrideFuzzerConfigurationsViaTOMLFile) {
     try {
         tomlConfig = toml::parse_file(configFilePath);
     } catch (const toml::parse_error &e) {
-        error("ControlPlaneSmith: Failed to parse fuzzer configuration file: %1%", e.what());
+        FAIL() << "ControlPlaneSmith: Failed to parse fuzzer configuration string: " << e.what();
     }
 
     // Check if the fuzzer configurations are overridden correctly.
@@ -72,89 +72,98 @@ TEST_F(TOMLFuzzerConfigurationTest, OverrideFuzzerConfigurationsViaTOMLFile) {
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxEntryGenCnt")) {
         // Check if the node represents an integer, meaning whether the configuration provided is
         // valid.
-        if (maxEntryGenCntNodeOpt.value().type() == toml::node_type::integer) {
-            ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(),
-                      maxEntryGenCntNodeOpt.value().value<int>().value());
+        if (auto maxEntryGenCntOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(
+                maxEntryGenCntNodeOpt.value())) {
+            ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(), maxEntryGenCntOpt.value());
         } else {
-            error(
-                "ControlPlaneSmith: The maximum number of entries to generate must be an integer.");
+            // Generate a fatal failure (that "returns from the current function") if the
+            // configuration is not an integer.
+            FAIL() << "ControlPlaneSmith: The maximum number of entries to generate must be an "
+                      "integer.";
         }
     }
 
     if (const auto maxAttemptsNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxAttempts")) {
-        if (maxAttemptsNodeOpt.value().type() == toml::node_type::integer) {
-            ASSERT_EQ(fuzzerConfig.getMaxAttempts(),
-                      maxAttemptsNodeOpt.value().value<int>().value());
+        if (auto maxAttemptsOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxAttemptsNodeOpt.value())) {
+            ASSERT_EQ(fuzzerConfig.getMaxAttempts(), maxAttemptsOpt.value());
         } else {
-            error("ControlPlaneSmith: The maximum number of attempts must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of attempts must be an integer.";
         }
     }
 
     if (const auto maxTablesNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxTables")) {
-        if (maxTablesNodeOpt.value().type() == toml::node_type::integer) {
-            ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesNodeOpt.value().value<int>().value());
+        if (auto maxTablesOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxTablesNodeOpt.value())) {
+            ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesOpt.value());
         } else {
-            error("ControlPlaneSmith: The maximum number of tables must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of tables must be an integer.";
         }
     }
 
     const std::vector<std::string> &tablesToSkip = fuzzerConfig.getTablesToSkip();
     if (const auto tablesToSkipNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "tablesToSkip")) {
-        if (tablesToSkipNodeOpt.value().type() == toml::node_type::array) {
-            const auto *expectedStringRepresentations = tablesToSkipNodeOpt.value().as_array();
-            for (size_t i = 0; i < expectedStringRepresentations->size(); i++) {
-                if (const auto str = expectedStringRepresentations->at(i).as_string()) {
-                    ASSERT_EQ(tablesToSkip[i], str->get());
-                } else {
-                    error("ControlPlaneSmith: The tables to skip must be strings.");
-                }
+        if (auto tablesToSkipConfigOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<std::vector<std::string>>(
+                    tablesToSkipNodeOpt.value())) {
+            const std::vector<std::string> &tablesToSkipConfig = tablesToSkipConfigOpt.value();
+            ASSERT_EQ(tablesToSkipConfig.size(), tablesToSkip.size());
+            for (size_t i = 0; i < tablesToSkipConfig.size(); i++) {
+                ASSERT_EQ(tablesToSkipConfig[i], tablesToSkip[i]);
             }
         } else {
-            error("ControlPlaneSmith: The tables to skip must be an array.");
+            FAIL() << "ControlPlaneSmith: The tables to skip must be an array.";
         }
     }
 
     if (const auto thresholdForDeletionNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "thresholdForDeletion")) {
-        if (thresholdForDeletionNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto thresholdForDeletionOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
+                    thresholdForDeletionNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getThresholdForDeletion(),
-                      thresholdForDeletionNodeOpt.value().value<uint64_t>().value());
+                      static_cast<uint64_t>(thresholdForDeletionOpt.value()));
         } else {
-            error("ControlPlaneSmith: The threshold for deletion must be an integer.");
+            FAIL() << "ControlPlaneSmith: The threshold for deletion must be an integer.";
         }
     }
 
     if (const auto maxUpdateCountNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxUpdateCount")) {
-        if (maxUpdateCountNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto maxUpdateCountOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<size_t>(
+                maxUpdateCountNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getMaxUpdateCount(),
-                      maxUpdateCountNodeOpt.value().value<size_t>().value());
+                      static_cast<size_t>(maxUpdateCountOpt.value()));
         } else {
-            error("ControlPlaneSmith: The maximum number of updates must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of updates must be an integer.";
         }
     }
 
     if (const auto maxUpdateTimeInMicrosecondsNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
                                                             "maxUpdateTimeInMicroseconds")) {
-        if (maxUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto maxUpdateTimeInMicrosecondsOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
+                    maxUpdateTimeInMicrosecondsNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getMaxUpdateTimeInMicroseconds(),
-                      maxUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value());
+                      static_cast<uint64_t>(maxUpdateTimeInMicrosecondsOpt.value()));
         } else {
-            error("ControlPlaneSmith: The maximum wait time must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum wait time must be an integer.";
         }
     }
     if (const auto minUpdateTimeInMicrosecondsNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
                                                             "minUpdateTimeInMicroseconds")) {
-        if (minUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto minUpdateTimeInMicrosecondsOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
+                    minUpdateTimeInMicrosecondsNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getMinUpdateTimeInMicroseconds(),
-                      minUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value());
+                      static_cast<uint64_t>(minUpdateTimeInMicrosecondsOpt.value()));
         } else {
-            error("ControlPlaneSmith: The minimum wait time must be an integer.");
+            FAIL() << "ControlPlaneSmith: The minimum wait time must be an integer.";
         }
     }
 }
@@ -222,7 +231,7 @@ TEST_F(TOMLFuzzerConfigurationTest, OverrideFuzzerConfigurationsViaTOMLString) {
     try {
         tomlConfig = toml::parse(configInString);
     } catch (const toml::parse_error &e) {
-        error("ControlPlaneSmith: Failed to parse fuzzer configuration string: %1%", e.what());
+        FAIL() << "ControlPlaneSmith: Failed to parse fuzzer configuration string: " << e.what();
     }
 
     // Check if the fuzzer configurations are overridden correctly.
@@ -232,89 +241,96 @@ TEST_F(TOMLFuzzerConfigurationTest, OverrideFuzzerConfigurationsViaTOMLString) {
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxEntryGenCnt")) {
         // Check if the node represents an integer, meaning whether the configuration provided is
         // valid.
-        if (maxEntryGenCntNodeOpt.value().type() == toml::node_type::integer) {
-            ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(),
-                      maxEntryGenCntNodeOpt.value().value<int>().value());
+        if (auto maxEntryGenCntOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(
+                maxEntryGenCntNodeOpt.value())) {
+            ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(), maxEntryGenCntOpt.value());
         } else {
-            error(
-                "ControlPlaneSmith: The maximum number of entries to generate must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of entries to generate must be an "
+                      "integer.";
         }
     }
 
     if (const auto maxAttemptsNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxAttempts")) {
-        if (maxAttemptsNodeOpt.value().type() == toml::node_type::integer) {
-            ASSERT_EQ(fuzzerConfig.getMaxAttempts(),
-                      maxAttemptsNodeOpt.value().value<int>().value());
+        if (auto maxAttemptsOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxAttemptsNodeOpt.value())) {
+            ASSERT_EQ(fuzzerConfig.getMaxAttempts(), maxAttemptsOpt.value());
         } else {
-            error("ControlPlaneSmith: The maximum number of attempts must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of attempts must be an integer.";
         }
     }
 
     if (const auto maxTablesNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxTables")) {
-        if (maxTablesNodeOpt.value().type() == toml::node_type::integer) {
-            ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesNodeOpt.value().value<int>().value());
+        if (auto maxTablesOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxTablesNodeOpt.value())) {
+            ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesOpt.value());
         } else {
-            error("ControlPlaneSmith: The maximum number of tables must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of tables must be an integer.";
         }
     }
 
     const std::vector<std::string> &tablesToSkip = fuzzerConfig.getTablesToSkip();
     if (const auto tablesToSkipNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "tablesToSkip")) {
-        if (tablesToSkipNodeOpt.value().type() == toml::node_type::array) {
-            const auto *expectedStringRepresentations = tablesToSkipNodeOpt.value().as_array();
-            for (size_t i = 0; i < expectedStringRepresentations->size(); i++) {
-                if (const auto str = expectedStringRepresentations->at(i).as_string()) {
-                    ASSERT_EQ(tablesToSkip[i], str->get());
-                } else {
-                    error("ControlPlaneSmith: The tables to skip must be strings.");
-                }
+        if (auto tablesToSkipConfigOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<std::vector<std::string>>(
+                    tablesToSkipNodeOpt.value())) {
+            const std::vector<std::string> &tablesToSkipConfig = tablesToSkipConfigOpt.value();
+            ASSERT_EQ(tablesToSkipConfig.size(), tablesToSkip.size());
+            for (size_t i = 0; i < tablesToSkipConfig.size(); i++) {
+                ASSERT_EQ(tablesToSkipConfig[i], tablesToSkip[i]);
             }
         } else {
-            error("ControlPlaneSmith: The tables to skip must be an array.");
+            FAIL() << "ControlPlaneSmith: The tables to skip must be an array.";
         }
     }
 
     if (const auto thresholdForDeletionNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "thresholdForDeletion")) {
-        if (thresholdForDeletionNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto thresholdForDeletionOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
+                    thresholdForDeletionNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getThresholdForDeletion(),
-                      thresholdForDeletionNodeOpt.value().value<uint64_t>().value());
+                      static_cast<uint64_t>(thresholdForDeletionOpt.value()));
         } else {
-            error("ControlPlaneSmith: The threshold for deletion must be an integer.");
+            FAIL() << "ControlPlaneSmith: The threshold for deletion must be an integer.";
         }
     }
 
     if (const auto maxUpdateCountNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxUpdateCount")) {
-        if (maxUpdateCountNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto maxUpdateCountOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<size_t>(
+                maxUpdateCountNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getMaxUpdateCount(),
-                      maxUpdateCountNodeOpt.value().value<size_t>().value());
+                      static_cast<size_t>(maxUpdateCountOpt.value()));
         } else {
-            error("ControlPlaneSmith: The maximum number of updates must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum number of updates must be an integer.";
         }
     }
 
     if (const auto maxUpdateTimeInMicrosecondsNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
                                                             "maxUpdateTimeInMicroseconds")) {
-        if (maxUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto maxUpdateTimeInMicrosecondsOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
+                    maxUpdateTimeInMicrosecondsNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getMaxUpdateTimeInMicroseconds(),
-                      maxUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value());
+                      static_cast<uint64_t>(maxUpdateTimeInMicrosecondsOpt.value()));
         } else {
-            error("ControlPlaneSmith: The maximum wait time must be an integer.");
+            FAIL() << "ControlPlaneSmith: The maximum wait time must be an integer.";
         }
     }
     if (const auto minUpdateTimeInMicrosecondsNodeOpt =
             P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
                                                             "minUpdateTimeInMicroseconds")) {
-        if (minUpdateTimeInMicrosecondsNodeOpt.value().type() == toml::node_type::integer) {
+        if (auto minUpdateTimeInMicrosecondsOpt =
+                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
+                    minUpdateTimeInMicrosecondsNodeOpt.value())) {
             ASSERT_EQ(fuzzerConfig.getMinUpdateTimeInMicroseconds(),
-                      minUpdateTimeInMicrosecondsNodeOpt.value().value<uint64_t>().value());
+                      static_cast<uint64_t>(minUpdateTimeInMicrosecondsOpt.value()));
         } else {
-            error("ControlPlaneSmith: The minimum wait time must be an integer.");
+            FAIL() << "ControlPlaneSmith: The minimum wait time must be an integer.";
         }
     }
 }

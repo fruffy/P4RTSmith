@@ -57,7 +57,7 @@ class FuzzerConfig {
     /// @param configInString The string representation of the configurations.
     void overrideFuzzerConfigsInString(std::string configInString);
 
-    // @brief Get the TOML node from the TOML result.
+    /// @brief Get the TOML node from the TOML result.
     static std::optional<toml::v3::node_view<const toml::v3::node>> getTOMLNode(
         const toml::parse_result &tomlConfig, const std::string &key);
 
@@ -73,6 +73,46 @@ class FuzzerConfig {
     }
     [[nodiscard]] uint64_t getMinUpdateTimeInMicroseconds() const {
         return minUpdateTimeInMicroseconds;
+    }
+
+    /// @brief Cast the TOML node to a specific type of value (encapsulated in `std::optional`).
+    template <typename T>
+    static std::optional<T> castTOMLNode(const toml::v3::node_view<const toml::v3::node> &node) {
+        if constexpr (std::is_same_v<T, int>) {
+            if (node.is_integer()) {
+                return node.as_integer()->get();
+            } else {
+                return std::nullopt;
+            }
+        } else if constexpr (std::is_same_v<T, uint64_t>) {
+            if (node.is_integer()) {
+                return node.as_integer()->get();
+            } else {
+                return std::nullopt;
+            }
+        } else if constexpr (std::is_same_v<T, size_t>) {
+            if (node.is_integer()) {
+                return node.as_integer()->get();
+            } else {
+                return std::nullopt;
+            }
+        } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+            if (node.is_array()) {
+                std::vector<std::string> result;
+                for (const auto &element : *node.as_array()) {
+                    if (element.is_string()) {
+                        result.push_back(element.as_string()->get());
+                    } else {
+                        return std::nullopt;
+                    }
+                }
+                return result;
+            } else {
+                return std::nullopt;
+            }
+        } else {
+            return std::nullopt;
+        }
     }
 };
 
