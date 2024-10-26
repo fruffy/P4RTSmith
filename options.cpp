@@ -143,8 +143,8 @@ std::optional<std::string> RtSmithOptions::fuzzerConfigString() const {
     return _fuzzerConfigString;
 }
 
-void RtSmithOptions::setFuzzerConfigPath(const char *arg) { _fuzzerConfigPath = arg; }
+void RtSmithOptions::setFuzzerConfigPath(std::string arg) { _fuzzerConfigPath = arg; }
 
-void RtSmithOptions::setFuzzerConfigString(const char *arg) { _fuzzerConfigString = arg; }
+void RtSmithOptions::setFuzzerConfigString(std::string arg) { _fuzzerConfigString = arg; }
 
 }  // namespace P4::P4Tools::RtSmith

@@ -19,12 +19,12 @@ const ::p4::config::v1::P4Info *ProgramInfo::getP4Info() const { return p4runtim
 
 const FuzzerConfig &ProgramInfo::getFuzzerConfig() const { return _fuzzerConfig; }
 
-void ProgramInfo::proceedToOverrideFuzzerConfigsViaFile(const char *path) {
-    _fuzzerConfig.overrideFuzzerConfigsViaFile(path);
+void ProgramInfo::loadFuzzerConfig(std::filesystem::path path) {
+    _fuzzerConfig.overrideFuzzerConfigs(path);
 }
 
-void ProgramInfo::proceedToOverrideFuzzerConfigsViaString(const char *configInString) {
-    _fuzzerConfig.overrideFuzzerConfigsViaString(configInString);
+void ProgramInfo::loadFuzzerConfigInString(std::string configInString) {
+    _fuzzerConfig.overrideFuzzerConfigsInString(configInString);
 }
 
 }  // namespace P4::P4Tools::RtSmith

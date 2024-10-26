@@ -1,6 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_RTSMITH_CORE_CONFIG_H_
 #define BACKENDS_P4TOOLS_MODULES_RTSMITH_CORE_CONFIG_H_
 
+#include <filesystem>
 #include <stdexcept>
 #include <vector>
 
@@ -49,12 +50,16 @@ class FuzzerConfig {
 
     /// @brief Override the default fuzzer configurations through the TOML file.
     /// @param path The path to the TOML file.
-    void overrideFuzzerConfigsViaFile(const char *path);
+    void overrideFuzzerConfigs(std::filesystem::path path);
 
     /// @brief Override the default fuzzer configurations through the string representation of the
     /// configurations of format TOML.
     /// @param configInString The string representation of the configurations.
-    void overrideFuzzerConfigsViaString(const char *configInString);
+    void overrideFuzzerConfigsInString(std::string configInString);
+
+    // @brief Get the TOML node from the TOML result.
+    static std::optional<toml::v3::node_view<const toml::v3::node>> getTOMLNode(
+        const toml::parse_result &tomlConfig, const std::string &key);
 
     /// Getters to access the fuzzer configurations.
     [[nodiscard]] int getMaxEntryGenCnt() const { return maxEntryGenCnt; }

@@ -58,12 +58,11 @@ const ProgramInfo *TofinoTnaRtSmithTarget::produceProgramInfoImpl(
     auto tofinoTnaProgramInfo = new TofinoTnaProgramInfo(compilerResult, p4runtimeApi.value());
     // Override the fuzzer configurations if a TOML file is provided.
     if (rtSmithOptions.fuzzerConfigPath().has_value())
-        tofinoTnaProgramInfo->proceedToOverrideFuzzerConfigsViaFile(
-            rtSmithOptions.fuzzerConfigPath().value().c_str());
+        tofinoTnaProgramInfo->loadFuzzerConfig(rtSmithOptions.fuzzerConfigPath().value());
     // Override the fuzzer configurations if a string representation of the configurations of format
     // TOML is provided.
     else if (rtSmithOptions.fuzzerConfigString().has_value()) {
-        tofinoTnaProgramInfo->proceedToOverrideFuzzerConfigsViaString(
+        tofinoTnaProgramInfo->loadFuzzerConfigInString(
             rtSmithOptions.fuzzerConfigString().value().c_str());
     }
     return tofinoTnaProgramInfo;
