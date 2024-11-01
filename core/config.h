@@ -5,8 +5,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <toml++/toml.hpp>
-
 #include "backends/p4tools/common/lib/util.h"
 
 namespace P4::P4Tools::RtSmith {
@@ -30,32 +28,12 @@ class FuzzerConfig {
     /// The minimum time (in microseconds) for the update.
     uint64_t minUpdateTimeInMicroseconds = 50000;
 
- protected:
-    /// Setters to modify/override the fuzzer configurations.
-    void setMaxEntryGenCnt(const int numEntries);
-    void setMaxAttempts(const int numAttempts);
-    void setMaxTables(const int numTables);
-    void setTablesToSkip(const std::vector<std::string> &tables);
-    void setThresholdForDeletion(const uint64_t threshold);
-    void setMaxUpdateCount(const size_t count);
-    void setMaxUpdateTimeInMicroseconds(const uint64_t micros);
-    void setMinUpdateTimeInMicroseconds(const uint64_t micros);
-
  public:
     // Default constructor.
     FuzzerConfig() = default;
 
     // Default destructor.
     virtual ~FuzzerConfig() = default;
-
-    /// @brief Override the default fuzzer configurations through the TOML file.
-    /// @param path The path to the TOML file.
-    void overrideFuzzerConfigs(std::filesystem::path path);
-
-    /// @brief Override the default fuzzer configurations through the string representation of the
-    /// configurations of format TOML.
-    /// @param configInString The string representation of the configurations.
-    void overrideFuzzerConfigsInString(std::string configInString);
 
     /// Getters to access the fuzzer configurations.
     [[nodiscard]] int getMaxEntryGenCnt() const { return maxEntryGenCnt; }
@@ -71,70 +49,15 @@ class FuzzerConfig {
         return minUpdateTimeInMicroseconds;
     }
 
-    /// @brief Get the TOML node from the TOML result and cast it to a specific type of value.
-    template <typename T>
-    static std::optional<T> getAndCastTOMLNode(const toml::parse_result &tomlConfig,
-                                               const std::string &key) {
-        if (auto node = tomlConfig[key]) {
-            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, uint64_t> ||
-                          std::is_same_v<T, size_t>) {
-                return castTOMLNode<T>(node);
-            } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-                if (auto nodeValuePtr = node.as_array()) {
-                    std::vector<std::string> result;
-                    for (const auto &element : *nodeValuePtr) {
-                        if (element.is_string()) {
-                            // Get the value of the string out of the `std::optional` encapsulations
-                            // and push it to the `result` vector.
-                            result.push_back(castTOMLNode<std::string>(element).value());
-                        } else {
-                            return std::nullopt;
-                        }
-                    }
-                    return std::make_optional(result);
-                } else {
-                    return std::nullopt;
-                }
-            } else {
-                return std::nullopt;
-            }
-        } else {
-            return std::nullopt;
-        }
-    }
-
-    /// @brief Cast the TOML node to a specific type of value (encapsulated in
-    /// `std::optional`).
-    template <typename T>
-    static std::optional<T> castTOMLNode(const toml::v3::node_view<const toml::v3::node> &node) {
-        if constexpr (std::is_same_v<T, int> || std::is_same_v<T, uint64_t> ||
-                      std::is_same_v<T, size_t>) {
-            if (auto nodeValuePtr = node.as_integer()) {
-                return std::make_optional(nodeValuePtr->get());
-            } else {
-                return std::nullopt;
-            }
-        } else {
-            return std::nullopt;
-        }
-    }
-
-    /// @brief Cast the TOML node to a specific type of value (encapsulated in
-    /// `std::optional`).
-    /// This is an overloaded function of the `castTOMLNode` function for the `toml::v3::node`-type
-    /// parameter.
-    template <typename T>
-    static std::optional<T> castTOMLNode(const toml::v3::node &node) {
-        if constexpr (std::is_same_v<T, std::string>) {
-            if (auto nodeValuePtr = node.as_string()) {
-                return std::make_optional(nodeValuePtr->get());
-            } else {
-                return std::nullopt;
-            }
-        } else {
-            return std::nullopt;
-        }
-    }
+    /// Setters to modify/override the fuzzer configurations.
+    void setMaxEntryGenCnt(const int numEntries);
+    void setMaxAttempts(const int numAttempts);
+    void setMaxTables(const int numTables);
+    void setTablesToSkip(const std::vector<std::string> &tables);
+    void setThresholdForDeletion(const uint64_t threshold);
+    void setMaxUpdateCount(const size_t count);
+    void setMaxUpdateTimeInMicroseconds(const uint64_t micros);
+    void setMinUpdateTimeInMicroseconds(const uint64_t micros);
 };
 
 }  // namespace P4::P4Tools::RtSmith

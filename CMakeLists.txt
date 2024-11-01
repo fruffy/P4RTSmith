@@ -20,6 +20,7 @@ set(RTSMITH_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/core/target.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/fuzzer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/config.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/toml_utils.cpp
 )
 
 # GTest source files for ControlPlaneSmith.
