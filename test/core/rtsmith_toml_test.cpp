@@ -67,104 +67,79 @@ TEST_F(TOMLFuzzerConfigurationTest, OverrideFuzzerConfigurationsViaTOMLFile) {
 
     // Check if the fuzzer configurations are overridden correctly.
     const P4::P4Tools::RtSmith::FuzzerConfig &fuzzerConfig = programInfo->getFuzzerConfig();
-    // Check if the node exists. If not, do nothing and leave the default configuration as is.
-    if (const auto maxEntryGenCntNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxEntryGenCnt")) {
-        // Check if the node represents an integer, meaning whether the configuration provided is
-        // valid.
-        if (auto maxEntryGenCntOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(
-                maxEntryGenCntNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(), maxEntryGenCntOpt.value());
-        } else {
-            // Generate a fatal failure (that "returns from the current function") if the
-            // configuration is not an integer.
-            FAIL() << "ControlPlaneSmith: The maximum number of entries to generate must be an "
-                      "integer.";
-        }
+    // Check if the node exists and can be casted to a pointer to a node representation of an
+    // integer. If not, do nothing and leave the default configuration as is.
+    if (const auto maxEntryGenCntValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<int>(tomlConfig,
+                                                                        "maxEntryGenCnt")) {
+        ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(), maxEntryGenCntValue.value());
+    } else {
+        // Generate a fatal failure (that "returns from the current function") if the
+        // configuration is not an integer.
+        FAIL() << "ControlPlaneSmith: The maximum number of entries to generate must be an "
+                  "integer.";
     }
 
-    if (const auto maxAttemptsNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxAttempts")) {
-        if (auto maxAttemptsOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxAttemptsNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxAttempts(), maxAttemptsOpt.value());
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of attempts must be an integer.";
-        }
+    if (const auto maxAttemptsValue = P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<int>(
+            tomlConfig, "maxAttempts")) {
+        ASSERT_EQ(fuzzerConfig.getMaxAttempts(), maxAttemptsValue.value());
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum number of attempts must be an integer.";
     }
 
-    if (const auto maxTablesNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxTables")) {
-        if (auto maxTablesOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxTablesNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesOpt.value());
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of tables must be an integer.";
-        }
+    if (const auto maxTablesValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<int>(tomlConfig, "maxTables")) {
+        ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesValue.value());
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum number of tables must be an integer.";
     }
 
     const std::vector<std::string> &tablesToSkip = fuzzerConfig.getTablesToSkip();
-    if (const auto tablesToSkipNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "tablesToSkip")) {
-        if (auto tablesToSkipConfigOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<std::vector<std::string>>(
-                    tablesToSkipNodeOpt.value())) {
-            const std::vector<std::string> &tablesToSkipConfig = tablesToSkipConfigOpt.value();
-            ASSERT_EQ(tablesToSkipConfig.size(), tablesToSkip.size());
-            for (size_t i = 0; i < tablesToSkipConfig.size(); i++) {
-                ASSERT_EQ(tablesToSkipConfig[i], tablesToSkip[i]);
-            }
-        } else {
-            FAIL() << "ControlPlaneSmith: The tables to skip must be an array.";
+    if (const auto tablesToSkipValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<std::vector<std::string>>(
+                tomlConfig, "tablesToSkip")) {
+        const std::vector<std::string> &tablesToSkipConfig = tablesToSkipValue.value();
+        ASSERT_EQ(tablesToSkipConfig.size(), tablesToSkip.size());
+        for (size_t i = 0; i < tablesToSkipConfig.size(); i++) {
+            ASSERT_EQ(tablesToSkipConfig[i], tablesToSkip[i]);
         }
+    } else {
+        FAIL() << "ControlPlaneSmith: The tables to skip must be an array.";
     }
 
-    if (const auto thresholdForDeletionNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "thresholdForDeletion")) {
-        if (auto thresholdForDeletionOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
-                    thresholdForDeletionNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getThresholdForDeletion(),
-                      static_cast<uint64_t>(thresholdForDeletionOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The threshold for deletion must be an integer.";
-        }
+    if (const auto thresholdForDeletionValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<uint64_t>(
+                tomlConfig, "thresholdForDeletion")) {
+        ASSERT_EQ(fuzzerConfig.getThresholdForDeletion(),
+                  static_cast<uint64_t>(thresholdForDeletionValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The threshold for deletion must be an integer.";
     }
 
-    if (const auto maxUpdateCountNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxUpdateCount")) {
-        if (auto maxUpdateCountOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<size_t>(
-                maxUpdateCountNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxUpdateCount(),
-                      static_cast<size_t>(maxUpdateCountOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of updates must be an integer.";
-        }
+    if (const auto maxUpdateCountValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<size_t>(tomlConfig,
+                                                                           "maxUpdateCount")) {
+        ASSERT_EQ(fuzzerConfig.getMaxUpdateCount(),
+                  static_cast<size_t>(maxUpdateCountValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum number of updates must be an integer.";
     }
 
-    if (const auto maxUpdateTimeInMicrosecondsNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
-                                                            "maxUpdateTimeInMicroseconds")) {
-        if (auto maxUpdateTimeInMicrosecondsOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
-                    maxUpdateTimeInMicrosecondsNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxUpdateTimeInMicroseconds(),
-                      static_cast<uint64_t>(maxUpdateTimeInMicrosecondsOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum wait time must be an integer.";
-        }
+    if (const auto maxUpdateTimeInMicrosecondsValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<uint64_t>(
+                tomlConfig, "maxUpdateTimeInMicroseconds")) {
+        ASSERT_EQ(fuzzerConfig.getMaxUpdateTimeInMicroseconds(),
+                  static_cast<uint64_t>(maxUpdateTimeInMicrosecondsValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum wait time must be an integer.";
     }
-    if (const auto minUpdateTimeInMicrosecondsNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
-                                                            "minUpdateTimeInMicroseconds")) {
-        if (auto minUpdateTimeInMicrosecondsOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
-                    minUpdateTimeInMicrosecondsNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMinUpdateTimeInMicroseconds(),
-                      static_cast<uint64_t>(minUpdateTimeInMicrosecondsOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The minimum wait time must be an integer.";
-        }
+    if (const auto minUpdateTimeInMicrosecondsValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<uint64_t>(
+                tomlConfig, "minUpdateTimeInMicroseconds")) {
+        ASSERT_EQ(fuzzerConfig.getMinUpdateTimeInMicroseconds(),
+                  static_cast<uint64_t>(minUpdateTimeInMicrosecondsValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The minimum wait time must be an integer.";
     }
 }
 
@@ -236,102 +211,79 @@ TEST_F(TOMLFuzzerConfigurationTest, OverrideFuzzerConfigurationsViaTOMLString) {
 
     // Check if the fuzzer configurations are overridden correctly.
     const P4::P4Tools::RtSmith::FuzzerConfig &fuzzerConfig = programInfo->getFuzzerConfig();
-    // Check if the node exists. If not, do nothing and leave the default configuration as is.
-    if (const auto maxEntryGenCntNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxEntryGenCnt")) {
-        // Check if the node represents an integer, meaning whether the configuration provided is
-        // valid.
-        if (auto maxEntryGenCntOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(
-                maxEntryGenCntNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(), maxEntryGenCntOpt.value());
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of entries to generate must be an "
-                      "integer.";
-        }
+    // Check if the node exists and can be casted to a pointer to a node representation of an
+    // integer. If not, do nothing and leave the default configuration as is.
+    if (const auto maxEntryGenCntValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<int>(tomlConfig,
+                                                                        "maxEntryGenCnt")) {
+        ASSERT_EQ(fuzzerConfig.getMaxEntryGenCnt(), maxEntryGenCntValue.value());
+    } else {
+        // Generate a fatal failure (that "returns from the current function") if the
+        // configuration is not an integer.
+        FAIL() << "ControlPlaneSmith: The maximum number of entries to generate must be an "
+                  "integer.";
     }
 
-    if (const auto maxAttemptsNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxAttempts")) {
-        if (auto maxAttemptsOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxAttemptsNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxAttempts(), maxAttemptsOpt.value());
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of attempts must be an integer.";
-        }
+    if (const auto maxAttemptsValue = P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<int>(
+            tomlConfig, "maxAttempts")) {
+        ASSERT_EQ(fuzzerConfig.getMaxAttempts(), maxAttemptsValue.value());
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum number of attempts must be an integer.";
     }
 
-    if (const auto maxTablesNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxTables")) {
-        if (auto maxTablesOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<int>(maxTablesNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesOpt.value());
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of tables must be an integer.";
-        }
+    if (const auto maxTablesValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<int>(tomlConfig, "maxTables")) {
+        ASSERT_EQ(fuzzerConfig.getMaxTables(), maxTablesValue.value());
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum number of tables must be an integer.";
     }
 
     const std::vector<std::string> &tablesToSkip = fuzzerConfig.getTablesToSkip();
-    if (const auto tablesToSkipNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "tablesToSkip")) {
-        if (auto tablesToSkipConfigOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<std::vector<std::string>>(
-                    tablesToSkipNodeOpt.value())) {
-            const std::vector<std::string> &tablesToSkipConfig = tablesToSkipConfigOpt.value();
-            ASSERT_EQ(tablesToSkipConfig.size(), tablesToSkip.size());
-            for (size_t i = 0; i < tablesToSkipConfig.size(); i++) {
-                ASSERT_EQ(tablesToSkipConfig[i], tablesToSkip[i]);
-            }
-        } else {
-            FAIL() << "ControlPlaneSmith: The tables to skip must be an array.";
+    if (const auto tablesToSkipValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<std::vector<std::string>>(
+                tomlConfig, "tablesToSkip")) {
+        const std::vector<std::string> &tablesToSkipConfig = tablesToSkipValue.value();
+        ASSERT_EQ(tablesToSkipConfig.size(), tablesToSkip.size());
+        for (size_t i = 0; i < tablesToSkipConfig.size(); i++) {
+            ASSERT_EQ(tablesToSkipConfig[i], tablesToSkip[i]);
         }
+    } else {
+        FAIL() << "ControlPlaneSmith: The tables to skip must be an array.";
     }
 
-    if (const auto thresholdForDeletionNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "thresholdForDeletion")) {
-        if (auto thresholdForDeletionOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
-                    thresholdForDeletionNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getThresholdForDeletion(),
-                      static_cast<uint64_t>(thresholdForDeletionOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The threshold for deletion must be an integer.";
-        }
+    if (const auto thresholdForDeletionValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<uint64_t>(
+                tomlConfig, "thresholdForDeletion")) {
+        ASSERT_EQ(fuzzerConfig.getThresholdForDeletion(),
+                  static_cast<uint64_t>(thresholdForDeletionValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The threshold for deletion must be an integer.";
     }
 
-    if (const auto maxUpdateCountNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig, "maxUpdateCount")) {
-        if (auto maxUpdateCountOpt = P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<size_t>(
-                maxUpdateCountNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxUpdateCount(),
-                      static_cast<size_t>(maxUpdateCountOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum number of updates must be an integer.";
-        }
+    if (const auto maxUpdateCountValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<size_t>(tomlConfig,
+                                                                           "maxUpdateCount")) {
+        ASSERT_EQ(fuzzerConfig.getMaxUpdateCount(),
+                  static_cast<size_t>(maxUpdateCountValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum number of updates must be an integer.";
     }
 
-    if (const auto maxUpdateTimeInMicrosecondsNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
-                                                            "maxUpdateTimeInMicroseconds")) {
-        if (auto maxUpdateTimeInMicrosecondsOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
-                    maxUpdateTimeInMicrosecondsNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMaxUpdateTimeInMicroseconds(),
-                      static_cast<uint64_t>(maxUpdateTimeInMicrosecondsOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The maximum wait time must be an integer.";
-        }
+    if (const auto maxUpdateTimeInMicrosecondsValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<uint64_t>(
+                tomlConfig, "maxUpdateTimeInMicroseconds")) {
+        ASSERT_EQ(fuzzerConfig.getMaxUpdateTimeInMicroseconds(),
+                  static_cast<uint64_t>(maxUpdateTimeInMicrosecondsValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The maximum wait time must be an integer.";
     }
-    if (const auto minUpdateTimeInMicrosecondsNodeOpt =
-            P4::P4Tools::RtSmith::FuzzerConfig::getTOMLNode(tomlConfig,
-                                                            "minUpdateTimeInMicroseconds")) {
-        if (auto minUpdateTimeInMicrosecondsOpt =
-                P4::P4Tools::RtSmith::FuzzerConfig::castTOMLNode<uint64_t>(
-                    minUpdateTimeInMicrosecondsNodeOpt.value())) {
-            ASSERT_EQ(fuzzerConfig.getMinUpdateTimeInMicroseconds(),
-                      static_cast<uint64_t>(minUpdateTimeInMicrosecondsOpt.value()));
-        } else {
-            FAIL() << "ControlPlaneSmith: The minimum wait time must be an integer.";
-        }
+    if (const auto minUpdateTimeInMicrosecondsValue =
+            P4::P4Tools::RtSmith::FuzzerConfig::getAndCastTOMLNode<uint64_t>(
+                tomlConfig, "minUpdateTimeInMicroseconds")) {
+        ASSERT_EQ(fuzzerConfig.getMinUpdateTimeInMicroseconds(),
+                  static_cast<uint64_t>(minUpdateTimeInMicrosecondsValue.value()));
+    } else {
+        FAIL() << "ControlPlaneSmith: The minimum wait time must be an integer.";
     }
 }
 
