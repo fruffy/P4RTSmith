@@ -14,6 +14,8 @@ p4tools_add_xfail_reason(
                # Type_Declaration.
   header-stack-ops-bmv2.p4 # Unknown method member expression: hdr_0.h2; of type header h2_t
   issue4739.p4 # type ForStatement not implemented in the core stepper
+  loop-3-clause-tricky2.p4 # Node for (i_0/i = 0; i_0/i < 7; i_0/i = i_0/i + 3) { n_0/n = n_0/n + (bit<8>)i_0/i }
+                           # of type ForStatement not implemented in the core stepper.
 )
 
 # These are custom externs we do not implement.
