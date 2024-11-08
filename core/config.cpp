@@ -7,7 +7,7 @@ namespace P4::P4Tools::RtSmith {
 void FuzzerConfig::setMaxEntryGenCnt(const int numEntries) {
     if (numEntries < 0) {
         error(
-            "P4RuntimeSmith: The maximum number of entries to generate must be a non-negative "
+            "ControlPlaneSmith: The maximum number of entries to generate must be a non-negative "
             "integer.");
     }
     maxEntryGenCnt = numEntries;
@@ -15,14 +15,14 @@ void FuzzerConfig::setMaxEntryGenCnt(const int numEntries) {
 
 void FuzzerConfig::setMaxAttempts(const int numAttempts) {
     if (numAttempts <= 0) {
-        error("P4RuntimeSmith: The number of attempts must be a positive integer.");
+        error("ControlPlaneSmith: The number of attempts must be a positive integer.");
     }
     maxAttempts = numAttempts;
 }
 
 void FuzzerConfig::setMaxTables(const int numTables) {
     if (numTables < 0) {
-        error("P4RuntimeSmith: The maximum number of tables must be a non-negative integer.");
+        error("ControlPlaneSmith: The maximum number of tables must be a non-negative integer.");
     }
     maxTables = numTables;
 }
@@ -39,13 +39,13 @@ void FuzzerConfig::setMaxUpdateCount(const size_t count) { maxUpdateCount = coun
 
 void FuzzerConfig::setMaxUpdateTimeInMicroseconds(const uint64_t micros) {
     if (micros <= 0) {
-        error("P4RuntimeSmith: The maximum wait time must be a positive integer.");
+        error("ControlPlaneSmith: The maximum wait time must be a positive integer.");
     }
     maxUpdateTimeInMicroseconds = micros;
 }
 void FuzzerConfig::setMinUpdateTimeInMicroseconds(const uint64_t micros) {
     if (micros <= 0) {
-        error("P4RuntimeSmith: The minimum wait time must be a positive integer.");
+        error("ControlPlaneSmith: The minimum wait time must be a positive integer.");
     }
     minUpdateTimeInMicroseconds = micros;
 }

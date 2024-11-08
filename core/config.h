@@ -1,6 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_RTSMITH_CORE_CONFIG_H_
 #define BACKENDS_P4TOOLS_MODULES_RTSMITH_CORE_CONFIG_H_
 
+#include <filesystem>
 #include <stdexcept>
 #include <vector>
 
@@ -27,17 +28,6 @@ class FuzzerConfig {
     /// The minimum time (in microseconds) for the update.
     uint64_t minUpdateTimeInMicroseconds = 50000;
 
- protected:
-    /// Setters to modify/override the fuzzer configurations.
-    void setMaxEntryGenCnt(const int numEntries);
-    void setMaxAttempts(const int numAttempts);
-    void setMaxTables(const int numTables);
-    void setTablesToSkip(const std::vector<std::string> &tables);
-    void setThresholdForDeletion(const uint64_t threshold);
-    void setMaxUpdateCount(const size_t count);
-    void setMaxUpdateTimeInMicroseconds(const uint64_t micros);
-    void setMinUpdateTimeInMicroseconds(const uint64_t micros);
-
  public:
     // Default constructor.
     FuzzerConfig() = default;
@@ -58,6 +48,16 @@ class FuzzerConfig {
     [[nodiscard]] uint64_t getMinUpdateTimeInMicroseconds() const {
         return minUpdateTimeInMicroseconds;
     }
+
+    /// Setters to modify/override the fuzzer configurations.
+    void setMaxEntryGenCnt(const int numEntries);
+    void setMaxAttempts(const int numAttempts);
+    void setMaxTables(const int numTables);
+    void setTablesToSkip(const std::vector<std::string> &tables);
+    void setThresholdForDeletion(const uint64_t threshold);
+    void setMaxUpdateCount(const size_t count);
+    void setMaxUpdateTimeInMicroseconds(const uint64_t micros);
+    void setMinUpdateTimeInMicroseconds(const uint64_t micros);
 };
 
 }  // namespace P4::P4Tools::RtSmith

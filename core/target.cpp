@@ -20,7 +20,7 @@ RtSmithTarget::RtSmithTarget(const std::string &deviceName, const std::string &a
     : CompilerTarget(TOOL_NAME, deviceName, archName) {}
 
 const ProgramInfo *RtSmithTarget::produceProgramInfoImpl(
-    const CompilerResult &compilerResult) const {
+    const CompilerResult &compilerResult, const RtSmithOptions &rtSmithOptions) const {
     const auto &program = compilerResult.getProgram();
     // Check that the program has at least one main declaration.
     const auto mainCount = program.getDeclsByName(IR::P4Program::main)->count();
@@ -36,7 +36,7 @@ const ProgramInfo *RtSmithTarget::produceProgramInfoImpl(
     BUG_CHECK(mainDecl, "%1%: Program's main declaration is a %2%, not a Declaration_Instance",
               mainNode, mainNode->node_type_name());
 
-    return produceProgramInfoImpl(compilerResult, mainDecl);
+    return produceProgramInfoImpl(compilerResult, rtSmithOptions, mainDecl);
 }
 
 RuntimeFuzzer &RtSmithTarget::getFuzzer(const ProgramInfo &programInfo) {
@@ -45,8 +45,9 @@ RuntimeFuzzer &RtSmithTarget::getFuzzer(const ProgramInfo &programInfo) {
 
 const RtSmithTarget &RtSmithTarget::get() { return Target::get<RtSmithTarget>(TOOL_NAME); }
 
-const ProgramInfo *RtSmithTarget::produceProgramInfo(const CompilerResult &compilerResult) {
-    return get().produceProgramInfoImpl(compilerResult);
+const ProgramInfo *RtSmithTarget::produceProgramInfo(const CompilerResult &compilerResult,
+                                                     const RtSmithOptions &rtSmithOptions) {
+    return get().produceProgramInfoImpl(compilerResult, rtSmithOptions);
 }
 
 ICompileContext *RtSmithTarget::makeContext() const {

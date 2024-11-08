@@ -96,6 +96,18 @@ RtSmithOptions::RtSmithOptions()
             return true;
         },
         "Use a random seed.");
+    registerOption(
+        "--toml", "filePath",
+        [this](const char *arg) {
+            _fuzzerConfigPath = arg;
+            if (_fuzzerConfigPath.value().extension() != ".toml") {
+                error("%1% must have a .toml extension.", _fuzzerConfigPath.value().c_str());
+                _fuzzerConfigPath = std::nullopt;
+                return false;
+            }
+            return true;
+        },
+        "Set the fuzzer configurations using the TOML file specified by the file path");
 }
 
 std::filesystem::path RtSmithOptions::outputDir() const { return _outputDir; }
@@ -122,5 +134,17 @@ std::optional<std::filesystem::path> RtSmithOptions::p4InfoFilePath() const {
 }
 
 std::string_view RtSmithOptions::controlPlaneApi() const { return _controlPlaneApi; }
+
+std::optional<std::filesystem::path> RtSmithOptions::fuzzerConfigPath() const {
+    return _fuzzerConfigPath;
+}
+
+std::optional<std::string> RtSmithOptions::fuzzerConfigString() const {
+    return _fuzzerConfigString;
+}
+
+void RtSmithOptions::setFuzzerConfigPath(std::string arg) { _fuzzerConfigPath = arg; }
+
+void RtSmithOptions::setFuzzerConfigString(std::string arg) { _fuzzerConfigString = arg; }
 
 }  // namespace P4::P4Tools::RtSmith

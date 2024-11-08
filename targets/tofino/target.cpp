@@ -37,7 +37,8 @@ MidEnd TofinoTnaRtSmithTarget::mkMidEnd(const CompilerOptions &options) const {
 }
 
 const ProgramInfo *TofinoTnaRtSmithTarget::produceProgramInfoImpl(
-    const CompilerResult &compilerResult, const IR::Declaration_Instance * /*mainDecl*/) const {
+    const CompilerResult &compilerResult, const RtSmithOptions &rtSmithOptions,
+    const IR::Declaration_Instance * /*mainDecl*/) const {
     std::optional<P4::P4RuntimeAPI> p4runtimeApi;
     auto p4UserInfo = RtSmithOptions::get().userP4Info();
     if (p4UserInfo.has_value()) {
@@ -54,7 +55,17 @@ const ProgramInfo *TofinoTnaRtSmithTarget::produceProgramInfoImpl(
             return nullptr;
         }
     }
-    return new TofinoTnaProgramInfo(compilerResult, p4runtimeApi.value());
+    auto tofinoTnaProgramInfo = new TofinoTnaProgramInfo(compilerResult, p4runtimeApi.value());
+    // Override the fuzzer configurations if a TOML file is provided.
+    if (rtSmithOptions.fuzzerConfigPath().has_value())
+        tofinoTnaProgramInfo->loadFuzzerConfig(rtSmithOptions.fuzzerConfigPath().value());
+    // Override the fuzzer configurations if a string representation of the configurations of format
+    // TOML is provided.
+    else if (rtSmithOptions.fuzzerConfigString().has_value()) {
+        tofinoTnaProgramInfo->loadFuzzerConfigInString(
+            rtSmithOptions.fuzzerConfigString().value().c_str());
+    }
+    return tofinoTnaProgramInfo;
 }
 
 TofinoTnaFuzzer &TofinoTnaRtSmithTarget::getFuzzerImpl(const ProgramInfo &programInfo) const {

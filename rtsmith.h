@@ -29,6 +29,12 @@ class RtSmith : public AbstractP4cTool<RtSmithOptions> {
                                                        const RtSmithOptions &rtSmithOptions);
 
     static std::optional<RtSmithResult> generateConfig(const RtSmithOptions &rtSmithOptions);
+
+    /// Generate the compiler result for the given program (in order to get a `ProgramInfo` object
+    /// later).
+    static std::optional<const P4::P4Tools::CompilerResult> generateCompilerResult(
+        std::optional<std::reference_wrapper<const std::string>> program,
+        const RtSmithOptions &rtSmithOptions);
 };
 
 }  // namespace P4::P4Tools::RtSmith

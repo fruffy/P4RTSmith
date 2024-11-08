@@ -20,6 +20,7 @@ set(RTSMITH_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/core/target.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/fuzzer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/config.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/toml_utils.cpp
 )
 
 # GTest source files for ControlPlaneSmith.
@@ -28,6 +29,7 @@ set(RTSMITH_GTEST_SOURCES
   ${P4C_SOURCE_DIR}/test/gtest/helpers.cpp
   ${P4C_SOURCE_DIR}/test/gtest/gtestp4c.cpp
   test/core/rtsmith_api_test.cpp
+  test/core/rtsmith_toml_test.cpp
 )
 
 # RTSmith libraries.
@@ -71,6 +73,28 @@ target_link_libraries(rtsmith ${RTSMITH_LIBS})
 add_p4tools_executable(p4rtsmith main.cpp)
 
 target_link_libraries(p4rtsmith rtsmith ${RTSMITH_LIBS})
+
+# Integrate toml++ into the build.
+include(FetchContent)
+FetchContent_Declare(
+  tomlplusplus
+  GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+  GIT_TAG        v3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
+target_link_libraries(rtsmith tomlplusplus::tomlplusplus)
+
+# Define the path to the configuration file.
+set(CONFIG_TOML_PATH ${CMAKE_CURRENT_SOURCE_DIR}/test/configuration.toml)
+
+# Copy the file to the binary directory.
+add_custom_command(
+  TARGET p4rtsmith POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          ${CONFIG_TOML_PATH}
+          $<TARGET_FILE_DIR:p4rtsmith>/test/configuration.toml
+  COMMENT "Copying test/configuration.toml to the build directory."
+)
 
 # Add some convenience links for invoking rtsmith.
 add_custom_target(

@@ -18,7 +18,7 @@ class TofinoTnaRtSmithTarget : public RtSmithTarget {
 
  protected:
     const ProgramInfo *produceProgramInfoImpl(
-        const CompilerResult &compilerResult,
+        const CompilerResult &compilerResult, const RtSmithOptions &rtSmithOptions,
         const IR::Declaration_Instance *mainDecl) const override;
 
     [[nodiscard]] TofinoTnaFuzzer &getFuzzerImpl(const ProgramInfo &programInfo) const override;

@@ -24,7 +24,7 @@ class ProgramInfo : public ICastable {
 
     /// The FuzzerConfig object that stores the configurations of the fuzzer.
     /// Default values are provided in the FuzzerConfig class.
-    P4::P4Tools::RtSmith::FuzzerConfig _fuzzerConfig = FuzzerConfig();
+    FuzzerConfig _fuzzerConfig;
 
  public:
     ProgramInfo(const ProgramInfo &) = default;
@@ -48,6 +48,12 @@ class ProgramInfo : public ICastable {
 
     /// @returns the FuzzerConfig associated with this program.
     [[nodiscard]] const FuzzerConfig &getFuzzerConfig() const;
+
+    /// Load the fuzzer configurations from a TOML file.
+    void loadFuzzerConfig(std::filesystem::path path);
+
+    /// Load the fuzzer configurations from a string representation of the configurations.
+    void loadFuzzerConfigInString(std::string configInString);
 };
 
 }  // namespace P4::P4Tools::RtSmith
