@@ -25,32 +25,29 @@ class TOMLUtils {
     template <typename T>
     static std::optional<T> getAndCastTOMLNode(const toml::parse_result &tomlConfig,
                                                const std::string &key) {
-        if (auto node = tomlConfig[key]) {
-            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, uint64_t> ||
-                          std::is_same_v<T, size_t>) {
-                return castTOMLNode<T>(node);
-            } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-                if (auto nodeValuePtr = node.as_array()) {
-                    std::vector<std::string> result;
-                    for (const auto &element : *nodeValuePtr) {
-                        if (element.is_string()) {
-                            // Get the value of the string out of the `std::optional` encapsulations
-                            // and push it to the `result` vector.
-                            result.push_back(castTOMLNode<std::string>(element).value());
-                        } else {
-                            return std::nullopt;
-                        }
-                    }
-                    return std::make_optional(result);
-                } else {
-                    return std::nullopt;
-                }
-            } else {
-                return std::nullopt;
-            }
-        } else {
+        auto node = tomlConfig[key];
+        if (!node) {
             return std::nullopt;
         }
+        if constexpr (std::is_same_v<T, int> || std::is_same_v<T, uint64_t> ||
+                      std::is_same_v<T, size_t>) {
+            return castTOMLNode<T>(node);
+        } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+            if (auto nodeValuePtr = node.as_array()) {
+                std::vector<std::string> result;
+                for (const auto &element : *nodeValuePtr) {
+                    if (element.is_string()) {
+                        // Get the value of the string out of the `std::optional` encapsulations
+                        // and push it to the `result` vector.
+                        result.push_back(castTOMLNode<std::string>(element).value());
+                    } else {
+                        return std::nullopt;
+                    }
+                }
+                return std::make_optional(result);
+            }
+        }
+        return std::nullopt;
     }
 
     /// @brief Cast the TOML node to a specific type of value (encapsulated in
@@ -61,29 +58,23 @@ class TOMLUtils {
                       std::is_same_v<T, size_t>) {
             if (auto nodeValuePtr = node.as_integer()) {
                 return std::make_optional(nodeValuePtr->get());
-            } else {
-                return std::nullopt;
             }
-        } else {
-            return std::nullopt;
         }
+        return std::nullopt;
     }
 
     /// @brief Cast the TOML node to a specific type of value (encapsulated in
     /// `std::optional`).
-    /// This is an overloaded function of the `castTOMLNode` function for the `toml::v3::node`-type
-    /// parameter.
+    /// This is an overloaded function of the `castTOMLNode` function for the
+    /// `toml::v3::node`-type parameter.
     template <typename T>
     static std::optional<T> castTOMLNode(const toml::v3::node &node) {
         if constexpr (std::is_same_v<T, std::string>) {
             if (auto nodeValuePtr = node.as_string()) {
                 return std::make_optional(nodeValuePtr->get());
-            } else {
-                return std::nullopt;
             }
-        } else {
-            return std::nullopt;
         }
+        return std::nullopt;
     }
 };
 
