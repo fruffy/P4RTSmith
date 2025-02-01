@@ -1,3 +1,6 @@
+# This script takes a P4 program and runs it through the p4rtsmith tool to generate a config file.
+# i.e. python run_test_batch.py <p4_program> <p4rtsmith_bin> -td <testdir> -s <seed>
+
 import argparse
 import logging
 import os
@@ -73,6 +76,7 @@ def find_p4c_dir():
 
 
 def run_tests(options: Options) -> int:
+    """Run the tests for the given options."""
     config_file_path = "initial_config.txtpb"
 
     seed = options.seed
